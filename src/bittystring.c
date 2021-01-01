@@ -152,7 +152,7 @@ bstr_next_capacity(uint64_t size)
 }
 
 int
-bstr_expand(bstr *bs, uint64_t len)
+bstr_expand_by(bstr *bs, uint64_t len)
 {
 #ifdef DEBUG
     if (BSTR_IS_SSO(bs))
@@ -221,7 +221,10 @@ bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len)
     }
     printf("[23]: %" PRIu64 "\n", bs->capacity);
 #endif
-    if (bstr_expand(bs, len) != BS_SUCCESS)
+    if (len <= 0)
+        return BS_FAIL;
+
+    if (bstr_expand_by(bs, len) != BS_SUCCESS)
         return BS_FAIL;
 
     if (BSTR_IS_SSO(bs))
@@ -251,7 +254,7 @@ bstr_append_from_printf(bstr *bs, const char * format, ...)
     if (len == -1)
         return BS_FAIL;
 
-    if (bstr_expand(bs, (uint64_t)len) != BS_SUCCESS)
+    if (bstr_expand_by(bs, (uint64_t) len) != BS_SUCCESS)
         return BS_FAIL;
 
     va_start(ap, format);
