@@ -15,10 +15,16 @@
 #define BS_MAX_CAPACITY 0x7FFFFFFFFFFFFFFF
 #define BS_MAX_SSO_CAPACITY 23
 
-typedef enum {
-    BS_SUCCESS = 0,
-    BS_FAIL
-} bs_str_ret;
+//typedef enum {
+//    BS_SUCCESS = 0,
+//    BS_FAIL
+//} bstr_ret_val;
+
+#define RETURN_CODES    C(BS_SUCCESS, "All good\n")             \
+                        C(BS_FAIL, "Function failed\n")
+#define C(k, v) k,
+typedef enum { RETURN_CODES } bstr_ret_val;
+#undef C
 
 typedef union
 {
@@ -33,27 +39,29 @@ typedef union
         char short_str[24-1];
         uint8_t short_size;  // not including null terminator
     };
-} bs_str_s;
+} bstr;
 
 /*
  * Creators
  */
-bs_str_s * bstr_s_new();
-bs_str_s * bstr_s_new_from_cstring(const char *cs, uint64_t len);
-void bstr_s_init(bs_str_s *bs);
+bstr * bstr_new();
+bstr * bstr_new_from_cstring(const char *cs, uint64_t len);
+void bstr_init(bstr *bs);
+const char * bstr_error_string(bstr_ret_val r);
 /*
  * Freers
  */
-void bstr_s_free(bs_str_s *bs);
+void bstr_free(bstr *bs);
+void bstr_free_buf(bstr *bs);
 /*
  * Accessors
  */
-uint64_t bstr_s_get_size(bs_str_s *bs);
-uint64_t bstr_s_get_capacity(bs_str_s *bs);
-const char * bstr_s_get_cstring(bs_str_s *bs);
+uint64_t bstr_size(bstr *bs);
+uint64_t bstr_capacity(bstr *bs);
+const char * bstr_cstring(bstr *bs);
 /*
  * Modifiers
  */
-int bstr_s_append_from_cstring(bs_str_s *bs, const char *cs, uint64_t len);
+int bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len);
 
 #endif //BITTYSTRING_BITTYSTRING_H
