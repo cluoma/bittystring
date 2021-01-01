@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <inttypes.h>
 
 #define BS_MAX_CAPACITY 0x7FFFFFFFFFFFFFFF
@@ -63,5 +64,6 @@ const char * bstr_cstring(bstr *bs);
  * Modifiers
  */
 int bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len);
+int bstr_append_from_printf(bstr *bs, const char * format, ...);
 
 #endif //BITTYSTRING_BITTYSTRING_H

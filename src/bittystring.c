@@ -221,8 +221,7 @@ bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len)
     }
     printf("[23]: %" PRIu64 "\n", bs->capacity);
 #endif
-    int r = bstr_expand(bs, len);
-    if (r != BS_SUCCESS)
+    if (bstr_expand(bs, len) != BS_SUCCESS)
         return BS_FAIL;
 
     if (BSTR_IS_SSO(bs))
@@ -238,6 +237,40 @@ bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len)
         bs->buf[bs->size + len] = '\0';
         bs->size += len;
     }
+
+    return BS_SUCCESS;
+}
+
+int
+bstr_append_from_printf(bstr *bs, const char * format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    int len = vsnprintf(NULL, 0, format, ap);
+    va_end(ap);
+    if (len == -1)
+        return BS_FAIL;
+
+    if (bstr_expand(bs, (uint64_t)len) != BS_SUCCESS)
+        return BS_FAIL;
+
+    va_start(ap, format);
+    if (BSTR_IS_SSO(bs))
+    {
+        uint8_t sso_size = BSTR_SSO_SIZE(bs);
+        len = vsnprintf(bs->short_str + sso_size, len+1, format, ap);
+        if (len == -1)
+            return BS_FAIL;
+        bstr_set_sso_size(bs, sso_size + (uint8_t)len);
+    }
+    else
+    {
+        len = vsnprintf(bs->buf + bs->size, len+1, format, ap);
+        if (len == -1)
+            return BS_FAIL;
+        bs->size += (uint64_t)len;
+    }
+    va_end(ap);
 
     return BS_SUCCESS;
 }
