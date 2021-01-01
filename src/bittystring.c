@@ -123,7 +123,7 @@ bstr_new_from_cstring(const char *cs, uint64_t len)
 void
 bstr_init(bstr *bs)
 {
-    memset(bs, 0, 24);
+    memset(bs, 0, sizeof(bstr));
     BSTR_SET_SSO(bs);
     bstr_set_sso_size(bs, 0);
 }
