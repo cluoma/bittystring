@@ -47,7 +47,7 @@ next_power2(uint64_t x)
 }
 
 void
-bstr_s_set_sso_size(bstr *bs, uint8_t size)
+bstr_set_sso_size(bstr *bs, uint8_t size)
 {
     bs->short_size = size;
     BSTR_SET_SSO(bs);
@@ -125,11 +125,11 @@ bstr_init(bstr *bs)
 {
     memset(bs, 0, 24);
     BSTR_SET_SSO(bs);
-    bstr_s_set_sso_size(bs, 0);
+    bstr_set_sso_size(bs, 0);
 }
 
 int
-bstr_s_resize_buffer(bstr *bs, uint64_t new_capacity)
+bstr_resize_buffer(bstr *bs, uint64_t new_capacity)
 {
     char * new_buf = BS_REALLOC(bs->buf, new_capacity);
     if (new_buf == NULL)
@@ -143,7 +143,7 @@ bstr_s_resize_buffer(bstr *bs, uint64_t new_capacity)
 }
 
 uint64_t
-bstr_s_next_capacity(uint64_t size)
+bstr_next_capacity(uint64_t size)
 {
     uint64_t capacity = next_power2(size);
     if (capacity > BS_MAX_CAPACITY)
@@ -152,7 +152,7 @@ bstr_s_next_capacity(uint64_t size)
 }
 
 int
-bstr_s_expand(bstr *bs, uint64_t len)
+bstr_expand(bstr *bs, uint64_t len)
 {
 #ifdef DEBUG
     if (BSTR_IS_SSO(bs))
@@ -165,7 +165,7 @@ bstr_s_expand(bstr *bs, uint64_t len)
         uint8_t sso_size = BSTR_SSO_SIZE(bs);
         if (sso_size + len + 1 > BS_MAX_SSO_CAPACITY)
         {
-            uint64_t initial_capacity = bstr_s_next_capacity(sso_size + len + 1);
+            uint64_t initial_capacity = bstr_next_capacity(sso_size + len + 1);
             if (sso_size + len + 1 > initial_capacity)
             {
                 fprintf(stderr, "Request length is too large\n");
@@ -189,13 +189,13 @@ bstr_s_expand(bstr *bs, uint64_t len)
     {
         if (bs->size + len + 1 > bs->capacity)
         {
-            uint64_t next_capacity = bstr_s_next_capacity(bs->size + len + 1);
+            uint64_t next_capacity = bstr_next_capacity(bs->size + len + 1);
             if (bs->size + len + 1 > next_capacity)
             {
                 fprintf(stderr, "Request length is too large\n");
                 return BS_FAIL;
             }
-            if (bstr_s_resize_buffer(bs, next_capacity) != BS_SUCCESS)
+            if (bstr_resize_buffer(bs, next_capacity) != BS_SUCCESS)
             {
                 fprintf(stderr, "Failed to expand buffer\n");
                 return BS_FAIL;
@@ -221,7 +221,7 @@ bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len)
     }
     printf("[23]: %" PRIu64 "\n", bs->capacity);
 #endif
-    int r = bstr_s_expand(bs, len);
+    int r = bstr_expand(bs, len);
     if (r != BS_SUCCESS)
         return BS_FAIL;
 
@@ -230,7 +230,7 @@ bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len)
         uint8_t sso_size = BSTR_SSO_SIZE(bs);
         memcpy(bs->short_str + sso_size, cs, len);
         bs->short_str[sso_size + len] = '\0';
-        bstr_s_set_sso_size(bs, sso_size+len);
+        bstr_set_sso_size(bs, sso_size + len);
     }
     else
     {
