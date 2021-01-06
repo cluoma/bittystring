@@ -8,7 +8,8 @@ A C string library with short-string optimization. Supports short string up to 2
 char *s = "Cool text";
 
 bstr *bs = bstr_new();
-bstr_append_from_cstring(bs, s, strlen(s));
+bstr_append_cstring(bs, s, strlen(s));
+printf("%s\n", bstr_cstring(bs));
 bstr_free(bs);
 ```
 
@@ -18,6 +19,7 @@ char *s = "Cool text";
 
 bstr bs;
 bstr_init(&bs);
-bstr_append_from_cstring(&bs, s, strlen(s));
+bstr_append_cstring(&bs, s, strlen(s));
+printf("%s\n", bstr_cstring(&bs));
 bstr_free_buf(&bs); // free not strictly necessary here because of short-string, but always a good idea
 ```

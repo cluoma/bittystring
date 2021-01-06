@@ -111,7 +111,7 @@ bstr_new_from_cstring(const char *cs, uint64_t len)
     if (bs == NULL)
         return NULL;
 
-    if (bstr_append_from_cstring(bs, cs, len) != BS_SUCCESS)
+    if (bstr_append_cstring(bs, cs, len) != BS_SUCCESS)
     {
         bstr_free(bs);
         return NULL;
@@ -212,7 +212,7 @@ bstr_expand_by(bstr *bs, uint64_t len)
 }
 
 int
-bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len)
+bstr_append_cstring(bstr *bs, const char *cs, uint64_t len)
 {
 #ifdef DEBUG
     for (int i = 0; i < 24; i++)
@@ -245,7 +245,7 @@ bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len)
 }
 
 int
-bstr_append_from_printf(bstr *bs, const char * format, ...)
+bstr_append_printf(bstr *bs, const char * format, ...)
 {
     va_list ap;
     va_start(ap, format);
@@ -274,6 +274,41 @@ bstr_append_from_printf(bstr *bs, const char * format, ...)
         bs->size += (uint64_t)len;
     }
     va_end(ap);
+
+    return BS_SUCCESS;
+}
+
+int
+bstr_prepend_cstring(bstr *bs, const char *cs, uint64_t len)
+{
+#ifdef DEBUG
+    for (int i = 0; i < 24; i++)
+    {
+        printf("[%d]: %" PRIu8 "\n", i, bs->short_str[i]);
+    }
+    printf("[23]: %" PRIu64 "\n", bs->capacity);
+#endif
+    if (len <= 0)
+        return BS_FAIL;
+
+    if (bstr_expand_by(bs, len) != BS_SUCCESS)
+        return BS_FAIL;
+
+    if (BSTR_IS_SSO(bs))
+    {
+        uint8_t sso_size = BSTR_SSO_SIZE(bs);
+        memmove(bs->short_str + len, bs->short_str, sso_size);
+        memcpy(bs->short_str, cs, len);
+        bs->short_str[sso_size + len] = '\0';
+        bstr_set_sso_size(bs, sso_size + len);
+    }
+    else
+    {
+        memmove(bs->buf + len, bs->buf, bs->size);
+        memcpy(bs->buf, cs, len);
+        bs->buf[bs->size + len] = '\0';
+        bs->size += len;
+    }
 
     return BS_SUCCESS;
 }

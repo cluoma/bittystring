@@ -16,11 +16,6 @@
 #define BS_MAX_CAPACITY 0x7FFFFFFFFFFFFFFF
 #define BS_MAX_SSO_CAPACITY 23
 
-//typedef enum {
-//    BS_SUCCESS = 0,
-//    BS_FAIL
-//} bstr_ret_val;
-
 #define RETURN_CODES    C(BS_SUCCESS, "All good\n")             \
                         C(BS_FAIL, "Function failed\n")
 #define C(k, v) k,
@@ -63,7 +58,8 @@ const char * bstr_cstring(bstr *bs);
 /*
  * Modifiers
  */
-int bstr_append_from_cstring(bstr *bs, const char *cs, uint64_t len);
-int bstr_append_from_printf(bstr *bs, const char * format, ...);
+int bstr_append_cstring(bstr *bs, const char *cs, uint64_t len);
+int bstr_append_printf(bstr *bs, const char * format, ...);
+int bstr_prepend_cstring(bstr *bs, const char *cs, uint64_t len);
 
 #endif //BITTYSTRING_BITTYSTRING_H
