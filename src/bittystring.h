@@ -22,25 +22,42 @@
 typedef enum { RETURN_CODES } bstr_ret_val;
 #undef C
 
+struct bstr_long_string
+{
+    char* buf;
+    uint64_t size;  // not including null terminator
+    uint64_t capacity;
+};
+struct bstr_short_string
+{
+    char short_str[24-1];
+    uint8_t short_size;  // not including null terminator
+};
 typedef union
 {
-    struct
-    {
-        char* buf;
-        uint64_t size;  // not including null terminator
-        uint64_t capacity;
-    };
-    struct
-    {
-        char short_str[24-1];
-        uint8_t short_size;  // not including null terminator
-    };
+    struct bstr_long_string ls;
+    struct bstr_short_string ss;
 } bstr;
+
+//typedef union
+//{
+//    struct
+//    {
+//        char* buf;
+//        uint64_t size;  // not including null terminator
+//        uint64_t capacity;
+//    };
+//    struct
+//    {
+//        char short_str[24-1];
+//        uint8_t short_size;  // not including null terminator
+//    };
+//} bstr;
 
 /*
  * Creators
  */
-bstr * bstr_new();
+bstr *bstr_new(void);
 bstr * bstr_new_from_cstring(const char *cs, uint64_t len);
 void bstr_init(bstr *bs);
 const char * bstr_error_string(bstr_ret_val r);
@@ -61,5 +78,6 @@ const char * bstr_cstring(bstr *bs);
 int bstr_append_cstring(bstr *bs, const char *cs, uint64_t len);
 int bstr_append_printf(bstr *bs, const char * format, ...);
 int bstr_prepend_cstring(bstr *bs, const char *cs, uint64_t len);
+int bstr_prepend_printf(bstr *bs, const char * format, ...);
 
 #endif //BITTYSTRING_BITTYSTRING_H

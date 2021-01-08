@@ -1,7 +1,8 @@
 projectname := bittystring
 
-CC := gcc
-CCFLAGS := -std=c99 -O3
+CC := clang
+CCFLAGS := -std=c99 -Wall -Weverything
+OPTIMIZATIONS := -O3
 
 all: tests
 
@@ -15,7 +16,7 @@ tests.o: src/tests.c
 	$(CC) $(CCFLAGS) -c src/tests.c
 
 bittystring.o: src/bittystring.c
-	$(CC) $(CCFLAGS) -c src/bittystring.c
+	$(CC) $(CCFLAGS) $(OPTIMIZATIONS) -c src/bittystring.c
 
 clean:
 	rm -f *.o *.a

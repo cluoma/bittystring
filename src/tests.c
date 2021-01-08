@@ -48,6 +48,13 @@ main()
     BASIC_ASSERT(bs, cool_text_small);
     bstr_free(bs);
 
+    // Create and prepend from printf
+    bs = bstr_new();
+    bstr_prepend_printf(bs, "%s", cool_text_small);
+    printf("%s\n", bstr_cstring(bs));
+    BASIC_ASSERT(bs, cool_text_small);
+    bstr_free(bs);
+
 
     /*
      * Long string
@@ -72,6 +79,12 @@ main()
     // Create and append from printf
     bs = bstr_new();
     bstr_append_printf(bs, "%s", cool_text_big);
+    BASIC_ASSERT(bs, cool_text_big);
+    bstr_free(bs);
+
+    // Create and prepend from printf
+    bs = bstr_new();
+    bstr_prepend_printf(bs, "%s", cool_text_big);
     BASIC_ASSERT(bs, cool_text_big);
     bstr_free(bs);
 

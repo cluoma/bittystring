@@ -7,7 +7,7 @@
 #include "bittystring.h"
 
 #define C(k, v) [k] = (v),
-const char * bstr_ret_string[] = { RETURN_CODES };
+static const char * bstr_ret_string[] = { RETURN_CODES };
 #undef C
 
 #define BS_MALLOC(X) malloc(X)
@@ -17,12 +17,12 @@ const char * bstr_ret_string[] = { RETURN_CODES };
 #define SSO_SET_MASK 0x80
 #define SSO_UNSET_MASK 0x7F
 
-#define BSTR_IS_SSO(X) ((X)->short_size >> 7)
-#define BSTR_SET_SSO(X) ((X)->short_size |= SSO_SET_MASK)
-#define BSTR_UNSET_SSO(X) ((X)->short_size &= SSO_UNSET_MASK)
-#define BSTR_SSO_SIZE(X) ((X)->short_size & SSO_UNSET_MASK)
+#define BSTR_IS_SSO(X) ((X)->ss.short_size >> 7)
+#define BSTR_SET_SSO(X) ((X)->ss.short_size |= SSO_SET_MASK)
+#define BSTR_UNSET_SSO(X) ((X)->ss.short_size &= SSO_UNSET_MASK)
+#define BSTR_SSO_SIZE(X) ((X)->ss.short_size & SSO_UNSET_MASK)
 
-uint64_t
+static uint64_t
 next_power2(uint64_t x)
 // Returns the smallest power of 2 greater than x
 // GCC builtin is undefined for 0. Don't use this function for 0.
@@ -34,7 +34,7 @@ next_power2(uint64_t x)
 //    printf("builtin of x: %d\n", __builtin_clzll(x));
 //    printf("bytes minus builtin: %llu\n", sizeof(unsigned long long)*8 - (uint64_t)__builtin_clzll(x));
 //    printf("next pow 2: %llu\n", (uint64_t)1 << ((sizeof(unsigned long long)*8) - __builtin_clzll(x)));
-    return (uint64_t)1 << ((sizeof(unsigned long long)*8) - __builtin_clzll(x));
+    return (uint64_t)1 << ((sizeof(unsigned long long)*8) - (unsigned long)__builtin_clzll(x));
 #else
     uint32_t power = 0;
     while (x > 0)
@@ -46,10 +46,10 @@ next_power2(uint64_t x)
 #endif
 }
 
-void
+static void
 bstr_set_sso_size(bstr *bs, uint8_t size)
 {
-    bs->short_size = size;
+    bs->ss.short_size = size;
     BSTR_SET_SSO(bs);
 }
 
@@ -62,7 +62,7 @@ bstr_size(bstr *bs)
     }
     else
     {
-        return bs->size;
+        return bs->ls.size;
     }
 }
 
@@ -75,7 +75,7 @@ bstr_capacity(bstr *bs)
     }
     else
     {
-        return bs->capacity;
+        return bs->ls.capacity;
     }
 }
 
@@ -84,16 +84,16 @@ bstr_cstring(bstr *bs)
 {
     if (BSTR_IS_SSO(bs))
     {
-        return bs->short_str;
+        return bs->ss.short_str;
     }
     else
     {
-        return bs->buf;
+        return bs->ls.buf;
     }
 }
 
 bstr *
-bstr_new()
+bstr_new(void)
 {
     bstr *bs = BS_MALLOC(sizeof(bstr));
     if (bs == NULL)
@@ -128,21 +128,21 @@ bstr_init(bstr *bs)
     bstr_set_sso_size(bs, 0);
 }
 
-int
+static int
 bstr_resize_buffer(bstr *bs, uint64_t new_capacity)
 {
-    char * new_buf = BS_REALLOC(bs->buf, new_capacity);
+    char * new_buf = BS_REALLOC(bs->ls.buf, new_capacity);
     if (new_buf == NULL)
     {
         return BS_FAIL;
     }
 
-    bs->buf = new_buf;
-    bs->capacity = new_capacity;
+    bs->ls.buf = new_buf;
+    bs->ls.capacity = new_capacity;
     return BS_SUCCESS;
 }
 
-uint64_t
+static uint64_t
 bstr_next_capacity(uint64_t size)
 {
     uint64_t capacity = next_power2(size);
@@ -151,7 +151,7 @@ bstr_next_capacity(uint64_t size)
     return capacity;
 }
 
-int
+static int
 bstr_expand_by(bstr *bs, uint64_t len)
 {
 #ifdef DEBUG
@@ -178,19 +178,19 @@ bstr_expand_by(bstr *bs, uint64_t len)
                 fprintf(stderr, "Failed to allocate buffer\n");
                 return BS_FAIL;
             }
-            memcpy(buf, bs->short_str, sso_size);
+            memcpy(buf, bs->ss.short_str, sso_size);
             buf[sso_size] = '\0';
-            bs->buf = buf;
-            bs->size = sso_size;
-            bs->capacity = initial_capacity;
+            bs->ls.buf = buf;
+            bs->ls.size = sso_size;
+            bs->ls.capacity = initial_capacity;
         }
     }
     else
     {
-        if (bs->size + len + 1 > bs->capacity)
+        if (bs->ls.size + len + 1 > bs->ls.capacity)
         {
-            uint64_t next_capacity = bstr_next_capacity(bs->size + len + 1);
-            if (bs->size + len + 1 > next_capacity)
+            uint64_t next_capacity = bstr_next_capacity(bs->ls.size + len + 1);
+            if (bs->ls.size + len + 1 > next_capacity)
             {
                 fprintf(stderr, "Request length is too large\n");
                 return BS_FAIL;
@@ -230,50 +230,16 @@ bstr_append_cstring(bstr *bs, const char *cs, uint64_t len)
     if (BSTR_IS_SSO(bs))
     {
         uint8_t sso_size = BSTR_SSO_SIZE(bs);
-        memcpy(bs->short_str + sso_size, cs, len);
-        bs->short_str[sso_size + len] = '\0';
+        memcpy(bs->ss.short_str + sso_size, cs, len);
+        bs->ss.short_str[sso_size + len] = '\0';
         bstr_set_sso_size(bs, sso_size + len);
     }
     else
     {
-        memcpy(bs->buf + bs->size, cs, len);
-        bs->buf[bs->size + len] = '\0';
-        bs->size += len;
+        memcpy(bs->ls.buf + bs->ls.size, cs, len);
+        bs->ls.buf[bs->ls.size + len] = '\0';
+        bs->ls.size += len;
     }
-
-    return BS_SUCCESS;
-}
-
-int
-bstr_append_printf(bstr *bs, const char * format, ...)
-{
-    va_list ap;
-    va_start(ap, format);
-    int len = vsnprintf(NULL, 0, format, ap);
-    va_end(ap);
-    if (len == -1)
-        return BS_FAIL;
-
-    if (bstr_expand_by(bs, (uint64_t) len) != BS_SUCCESS)
-        return BS_FAIL;
-
-    va_start(ap, format);
-    if (BSTR_IS_SSO(bs))
-    {
-        uint8_t sso_size = BSTR_SSO_SIZE(bs);
-        len = vsnprintf(bs->short_str + sso_size, len+1, format, ap);
-        if (len == -1)
-            return BS_FAIL;
-        bstr_set_sso_size(bs, sso_size + (uint8_t)len);
-    }
-    else
-    {
-        len = vsnprintf(bs->buf + bs->size, len+1, format, ap);
-        if (len == -1)
-            return BS_FAIL;
-        bs->size += (uint64_t)len;
-    }
-    va_end(ap);
 
     return BS_SUCCESS;
 }
@@ -297,18 +263,94 @@ bstr_prepend_cstring(bstr *bs, const char *cs, uint64_t len)
     if (BSTR_IS_SSO(bs))
     {
         uint8_t sso_size = BSTR_SSO_SIZE(bs);
-        memmove(bs->short_str + len, bs->short_str, sso_size);
-        memcpy(bs->short_str, cs, len);
-        bs->short_str[sso_size + len] = '\0';
+        memmove(bs->ss.short_str + len, bs->ss.short_str, sso_size);
+        memcpy(bs->ss.short_str, cs, len);
+        bs->ss.short_str[sso_size + len] = '\0';
         bstr_set_sso_size(bs, sso_size + len);
     }
     else
     {
-        memmove(bs->buf + len, bs->buf, bs->size);
-        memcpy(bs->buf, cs, len);
-        bs->buf[bs->size + len] = '\0';
-        bs->size += len;
+        memmove(bs->ls.buf + len, bs->ls.buf, bs->ls.size);
+        memcpy(bs->ls.buf, cs, len);
+        bs->ls.buf[bs->ls.size + len] = '\0';
+        bs->ls.size += len;
     }
+
+    return BS_SUCCESS;
+}
+
+int
+bstr_append_printf(bstr *bs, const char * format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    int len = vsnprintf(NULL, 0, format, ap);
+    va_end(ap);
+    if (len == -1)
+        return BS_FAIL;
+
+    if (bstr_expand_by(bs, (uint64_t) len) != BS_SUCCESS)
+        return BS_FAIL;
+
+    va_start(ap, format);
+    if (BSTR_IS_SSO(bs))
+    {
+        uint8_t sso_size = BSTR_SSO_SIZE(bs);
+        len = vsnprintf(bs->ss.short_str + sso_size, len+1, format, ap);
+        if (len == -1)
+            return BS_FAIL;
+        bstr_set_sso_size(bs, sso_size + (uint8_t)len);
+    }
+    else
+    {
+        len = vsnprintf(bs->ls.buf + bs->ls.size, len+1, format, ap);
+        if (len == -1)
+            return BS_FAIL;
+        bs->ls.size += (uint64_t)len;
+    }
+    va_end(ap);
+
+    return BS_SUCCESS;
+}
+
+int
+bstr_prepend_printf(bstr *bs, const char * format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    int len = vsnprintf(NULL, 0, format, ap);
+    va_end(ap);
+    if (len == -1)
+        return BS_FAIL;
+
+    if (bstr_expand_by(bs, (uint64_t) len) != BS_SUCCESS)
+        return BS_FAIL;
+
+    va_start(ap, format);
+    if (BSTR_IS_SSO(bs))
+    {
+        uint8_t sso_size = BSTR_SSO_SIZE(bs);
+        memmove(bs->ss.short_str + len, bs->ss.short_str, sso_size);
+        char save = bs->ss.short_str[len];
+        len = vsnprintf(bs->ss.short_str, len+1, format, ap);
+        bs->ss.short_str[len] = save;
+        bs->ss.short_str[sso_size + len] = '\0';
+        if (len == -1)
+            return BS_FAIL;
+        bstr_set_sso_size(bs, sso_size + (uint8_t)len);
+    }
+    else
+    {
+        memmove(bs->ls.buf + len, bs->ls.buf, bs->ls.size);
+        char save = bs->ls.buf[len];
+        len = vsnprintf(bs->ls.buf, len+1, format, ap);
+        bs->ls.buf[len] = save;
+        bs->ls.buf[bs->ls.size + len] = '\0';
+        if (len == -1)
+            return BS_FAIL;
+        bs->ls.size += (uint64_t)len;
+    }
+    va_end(ap);
 
     return BS_SUCCESS;
 }
@@ -316,8 +358,8 @@ bstr_prepend_cstring(bstr *bs, const char *cs, uint64_t len)
 void
 bstr_free_buf(bstr *bs)
 {
-    if (!BSTR_IS_SSO(bs) && bs->buf)
-        BS_FREE(bs->buf);
+    if (!BSTR_IS_SSO(bs) && bs->ls.buf)
+        BS_FREE(bs->ls.buf);
 }
 
 void
