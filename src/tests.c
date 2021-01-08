@@ -12,7 +12,7 @@
 #define BASIC_ASSERT(X, Y) \
     assert(bstr_size((X)) == strlen((Y))); \
     assert(strlen(bstr_cstring((X))) == strlen((Y))); \
-    assert(strcmp(bstr_cstring((X)), (Y)) == 0);
+    assert(strcmp(bstr_cstring((X)), (Y)) == 0)
 
 int
 main()
