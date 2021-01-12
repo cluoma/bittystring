@@ -39,21 +39,6 @@ typedef union
     struct bstr_short_string ss;
 } bstr;
 
-//typedef union
-//{
-//    struct
-//    {
-//        char* buf;
-//        uint64_t size;  // not including null terminator
-//        uint64_t capacity;
-//    };
-//    struct
-//    {
-//        char short_str[24-1];
-//        uint8_t short_size;  // not including null terminator
-//    };
-//} bstr;
-
 /*
  * Creators
  */
