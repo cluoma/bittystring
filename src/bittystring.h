@@ -50,7 +50,7 @@ const char * bstr_error_string(bstr_ret_val r);
  * Freers
  */
 void bstr_free(bstr *bs);
-void bstr_free_buf(bstr *bs);
+void bstr_free_contents(bstr *bs);
 /*
  * Accessors
  */

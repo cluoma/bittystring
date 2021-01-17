@@ -21,5 +21,5 @@ bstr bs;
 bstr_init(&bs);
 bstr_append_cstring(&bs, s, strlen(s));
 printf("%s\n", bstr_cstring(&bs));
-bstr_free_buf(&bs); // free not strictly necessary here because of short-string, but always a good idea
+bstr_free_contents(&bs); // free not strictly necessary here because of short-string, but always a good idea
 ```

@@ -95,12 +95,12 @@ main()
     bstr_init(&bstack);
     bstr_append_printf(&bstack, "%s", cool_text_small);
     BASIC_ASSERT(&bstack, cool_text_small);
-    bstr_free_buf(&bstack);
+    bstr_free_contents(&bstack);
 
     bstr_init(&bstack);
     bstr_append_printf(&bstack, "%s", cool_text_big);
     BASIC_ASSERT(&bstack, cool_text_big);
-    bstr_free_buf(&bstack);
+    bstr_free_contents(&bstack);
 
     return 0;
 }
