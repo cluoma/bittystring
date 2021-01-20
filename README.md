@@ -23,3 +23,9 @@ bstr_append_cstring(&bs, s, strlen(s));
 printf("%s\n", bstr_cstring(&bs));
 bstr_free_contents(&bs); // free not strictly necessary here because of short-string, but always a good idea
 ```
+
+# Caveats
+
+`bittystring` uses the most-significant bit of the `uint64_t` capacity variable to store the short-string flag. So the maximum capacity of a `bstr` is limited to 2^63.
+
+`bittystring` is only designed for little-endian platforms.
