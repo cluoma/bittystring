@@ -26,6 +26,6 @@ bstr_free_contents(&bs); // free not strictly necessary here because of short-st
 
 # Caveats
 
-`bittystring` uses the most-significant bit of the `uint64_t` capacity variable to store the short-string flag. So the maximum capacity of a `bstr` is limited to 2^63.
+`bittystring` uses the most-significant bit of `uint64_t capacity` to store the short-string flag. So the theoretical maximum capacity of a `bstr` is limited to 2^63 bytes.
 
 `bittystring` is only designed for little-endian platforms.
