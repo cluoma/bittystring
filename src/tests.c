@@ -20,6 +20,8 @@ main()
     bstr *bs;
     char * cool_text_small = "Some really cool text!";
     char * cool_text_big = "Some really cool text!Some really cool text!";
+    char * cool_text_big_abc = "Some really cool text!Some really cool text!abc";
+    char * cool_text_big_cba = "cbaSome really cool text!Some really cool text!";
 
 
     /*
@@ -51,8 +53,23 @@ main()
     // Create and prepend from printf
     bs = bstr_new();
     bstr_prepend_printf(bs, "%s", cool_text_small);
-    printf("%s\n", bstr_cstring(bs));
     BASIC_ASSERT(bs, cool_text_small);
+    bstr_free(bs);
+
+    // Create and append from char
+    bs = bstr_new();
+    bstr_append_char(bs, 'a');
+    bstr_append_char(bs, 'b');
+    bstr_append_char(bs, 'c');
+    BASIC_ASSERT(bs, "abc");
+    bstr_free(bs);
+
+    // Create and prepend from char
+    bs = bstr_new();
+    bstr_prepend_char(bs, 'a');
+    bstr_prepend_char(bs, 'b');
+    bstr_prepend_char(bs, 'c');
+    BASIC_ASSERT(bs, "cba");
     bstr_free(bs);
 
 
@@ -86,6 +103,24 @@ main()
     bs = bstr_new();
     bstr_prepend_printf(bs, "%s", cool_text_big);
     BASIC_ASSERT(bs, cool_text_big);
+    bstr_free(bs);
+
+    // Create and append from char
+    bs = bstr_new();
+    bstr_append_cstring(bs, cool_text_big, strlen(cool_text_big));
+    bstr_append_char(bs, 'a');
+    bstr_append_char(bs, 'b');
+    bstr_append_char(bs, 'c');
+    BASIC_ASSERT(bs, cool_text_big_abc);
+    bstr_free(bs);
+
+    // Create and prepend from char
+    bs = bstr_new();
+    bstr_prepend_cstring(bs, cool_text_big, strlen(cool_text_big));
+    bstr_prepend_char(bs, 'a');
+    bstr_prepend_char(bs, 'b');
+    bstr_prepend_char(bs, 'c');
+    BASIC_ASSERT(bs, cool_text_big_cba);
     bstr_free(bs);
 
     /*

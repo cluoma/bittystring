@@ -61,8 +61,12 @@ const char * bstr_cstring(bstr *bs);
  * Modifiers
  */
 int bstr_append_cstring(bstr *bs, const char *cs, uint64_t len);
+int bstr_append_cstring_nolen(bstr *bs, const char *cs);
+int bstr_append_char(bstr *bs, char c);
 int bstr_append_printf(bstr *bs, const char * format, ...);
 int bstr_prepend_cstring(bstr *bs, const char *cs, uint64_t len);
+int bstr_prepend_cstring_nolen(bstr *bs, const char *cs);
+int bstr_prepend_char(bstr *bs, char c);
 int bstr_prepend_printf(bstr *bs, const char * format, ...);
 
 #endif //BITTYSTRING_BITTYSTRING_H
