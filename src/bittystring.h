@@ -16,6 +16,8 @@
 #define BS_MAX_CAPACITY (UINT64_MAX >> 1)
 #define BS_MAX_SSO_CAPACITY 23
 
+#define bstr_const_str(X) (X), ((uint64_t)sizeof(X)-1)
+
 #define RETURN_CODES    C(BS_SUCCESS, "All good\n")             \
                         C(BS_FAIL, "Function failed\n")
 #define C(k, v) k,

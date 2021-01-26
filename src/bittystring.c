@@ -57,39 +57,27 @@ uint64_t
 bstr_size(bstr *bs)
 {
     if (BSTR_IS_SSO(bs))
-    {
         return (uint64_t)BSTR_SSO_SIZE(bs);
-    }
     else
-    {
         return bs->ls.size;
-    }
 }
 
 uint64_t
 bstr_capacity(bstr *bs)
 {
     if (BSTR_IS_SSO(bs))
-    {
         return (uint64_t)BS_MAX_SSO_CAPACITY;
-    }
     else
-    {
         return bs->ls.capacity;
-    }
 }
 
 const char *
 bstr_cstring(bstr *bs)
 {
     if (BSTR_IS_SSO(bs))
-    {
         return bs->ss.short_str;
-    }
     else
-    {
         return bs->ls.buf;
-    }
 }
 
 bstr *
@@ -100,7 +88,6 @@ bstr_new(void)
         return NULL;
 
     bstr_init(bs);
-
     return bs;
 }
 
@@ -116,7 +103,6 @@ bstr_new_from_cstring(const char *cs, uint64_t len)
         bstr_free(bs);
         return NULL;
     }
-
     return bs;
 }
 
@@ -154,12 +140,6 @@ bstr_next_capacity(uint64_t size)
 static int
 bstr_expand_by(bstr *bs, uint64_t len)
 {
-#ifdef DEBUG
-    if (BSTR_IS_SSO(bs))
-        printf("original size: %" PRIu8 "\n", BSTR_SSO_SIZE(bs));
-    else
-        printf("original size: %" PRIu64 "\n", bs->size);
-#endif
     if (BSTR_IS_SSO(bs))
     {
         uint8_t sso_size = BSTR_SSO_SIZE(bs);
@@ -202,25 +182,12 @@ bstr_expand_by(bstr *bs, uint64_t len)
             }
         }
     }
-#ifdef DEBUG
-    if (BSTR_IS_SSO(bs))
-        printf("new size: %" PRIu8 "\n", BSTR_SSO_SIZE(bs));
-    else
-        printf("new size: %" PRIu64 "\n", bs->size);
-#endif
     return BS_SUCCESS;
 }
 
 int
 bstr_append_cstring(bstr *bs, const char *cs, uint64_t len)
 {
-#ifdef DEBUG
-    for (int i = 0; i < 24; i++)
-    {
-        printf("[%d]: %" PRIu8 "\n", i, bs->short_str[i]);
-    }
-    printf("[23]: %" PRIu64 "\n", bs->capacity);
-#endif
     if (len == 0) return BS_SUCCESS;
 
     if (bstr_expand_by(bs, len) != BS_SUCCESS)
@@ -246,13 +213,6 @@ bstr_append_cstring(bstr *bs, const char *cs, uint64_t len)
 int
 bstr_prepend_cstring(bstr *bs, const char *cs, uint64_t len)
 {
-#ifdef DEBUG
-    for (int i = 0; i < 24; i++)
-    {
-        printf("[%d]: %" PRIu8 "\n", i, bs->short_str[i]);
-    }
-    printf("[23]: %" PRIu64 "\n", bs->capacity);
-#endif
     if (len == 0) return BS_SUCCESS;
 
     if (bstr_expand_by(bs, len) != BS_SUCCESS)

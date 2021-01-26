@@ -137,5 +137,14 @@ main()
     BASIC_ASSERT(&bstack, cool_text_big);
     bstr_free_contents(&bstack);
 
+    /*
+     * Const str macro
+     */
+    bs = bstr_new();
+    bstr_append_cstring(bs, bstr_const_str("hello _world!"));
+    bstr_prepend_cstring(bs, bstr_const_str("BYE!"));
+    BASIC_ASSERT(bs, "BYE!hello _world!");
+    bstr_free(bs);
+
     return 0;
 }
