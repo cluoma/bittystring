@@ -54,7 +54,7 @@ bstr_set_sso_size(bstr *bs, uint8_t size)
 }
 
 uint64_t
-bstr_size(bstr *bs)
+bstr_size(const bstr *bs)
 {
     if (BSTR_IS_SSO(bs))
         return (uint64_t)BSTR_SSO_SIZE(bs);
@@ -63,7 +63,7 @@ bstr_size(bstr *bs)
 }
 
 uint64_t
-bstr_capacity(bstr *bs)
+bstr_capacity(const bstr *bs)
 {
     if (BSTR_IS_SSO(bs))
         return (uint64_t)BS_MAX_SSO_CAPACITY;
@@ -72,7 +72,7 @@ bstr_capacity(bstr *bs)
 }
 
 const char *
-bstr_cstring(bstr *bs)
+bstr_cstring(const bstr *bs)
 {
     if (BSTR_IS_SSO(bs))
         return bs->ss.short_str;
@@ -250,13 +250,13 @@ bstr_prepend_cstring_nolen(bstr *bs, const char *cs)
 }
 
 int
-bstr_append_char(bstr *bs, char c)
+bstr_append_char(bstr *bs, const char c)
 {
     char cs[1]; *cs = c;
     return bstr_append_cstring(bs, cs, 1);
 }
 int
-bstr_prepend_char(bstr *bs, char c)
+bstr_prepend_char(bstr *bs, const char c)
 {
     char cs[1]; *cs = c;
     return bstr_prepend_cstring(bs, cs, 1);
