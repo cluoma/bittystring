@@ -146,5 +146,22 @@ main()
     BASIC_ASSERT(bs, "BYE!hello _world!");
     bstr_free(bs);
 
+    /*
+     * Move
+     */
+    char *qq = malloc(35);
+    qq[0] = '\0';
+    strcat(qq, "l;kajsdfdiowien;knvf;dsi12345");
+    bs = bstr_new_move(qq, strlen(qq));
+    printf("aa: %s\n", bstr_cstring(bs));
+    bstr_append_cstring_nolen(bs, "\nsometexttoaskjlfiojisdjflskdjflsdf666");
+    printf("aa: %s\n", bstr_cstring(bs));
+    qq = malloc(35);
+    qq[0] = '\0';
+    strcat(qq, "something super cool and sneaky");
+    bstr_replace_move(bs, qq, strlen(qq));
+    printf("aa: %s\n", bstr_cstring(bs));
+    bstr_free(bs);
+
     return 0;
 }
