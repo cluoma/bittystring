@@ -356,7 +356,7 @@ bstr_replace_move(bstr *bs, char *cs, uint64_t len)
 void
 bstr_replace_move_nolen(bstr *bs, char *cs)
 {
-    bstr_replace_move(bs, strlen(cs));
+    bstr_replace_move(bs, cs, strlen(cs));
 }
 
 void
